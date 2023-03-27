@@ -486,7 +486,7 @@ class game_state:
                 self.board[undoing_move.rook_ending_square[0]][undoing_move.rook_ending_square[1]] = Player.EMPTY
                 undoing_move.moving_rook.change_row_number(undoing_move.rook_starting_square[0])
                 undoing_move.moving_rook.change_col_number(undoing_move.rook_starting_square[1])
-                if undoing_move.moving_piece is Player.PLAYER_1:
+                if undoing_move.moving_piece.get_player() is Player.PLAYER_1:
                     if undoing_move.rook_starting_square[1] == 0:
                         self.white_king_can_castle[0] = True
                         self.white_king_can_castle[1] = True
