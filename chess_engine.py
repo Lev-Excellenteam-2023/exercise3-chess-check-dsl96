@@ -5,6 +5,7 @@
 # Note: move log class inspired by Eddie Sharick
 #
 from Piece import Rook, Knight, Bishop, Queen, King, Pawn
+from chess_logger import chess_logger
 from enums import Player
 
 '''
@@ -25,9 +26,14 @@ r \ c     0           1           2           3           4           5         
 # TODO: stalemate
 # TODO: move logs - fix king castle boolean update
 # TODO: change move method argument about is_ai into something more elegant
+
 class game_state:
+
     # Initialize 2D array to represent the chess board
     def __init__(self):
+        #log
+        self.logger = chess_logger()
+
         # The board is a 2D array
         # TODO: Change to a numpy format later
         self.white_captives = []
@@ -109,6 +115,15 @@ class game_state:
             [black_rook_1, black_knight_1, black_bishop_1, black_king, black_queen, black_bishop_2, black_knight_2,
              black_rook_2]
         ]
+        #log
+        self.logger.start_new_game(self.board)
+
+
+    def set_ai_mode(self,ai_player):
+        '''
+        func only for log format use
+        '''
+        self.logger.set_ai_mode(ai_player)
 
     def get_piece(self, row, col):
         if (0 <= row < 8) and (0 <= col < 8):
@@ -216,16 +231,24 @@ class game_state:
             return None
 
     # 0 if white lost, 1 if black lost, 2 if stalemate, 3 if not game over
-    def checkmate_stalemate_checker(self):
+    def checkmate_stalemate_checker(self,is_ai =False):
         all_white_moves = self.get_all_legal_moves(Player.PLAYER_1)
         all_black_moves = self.get_all_legal_moves(Player.PLAYER_2)
+
+        def log(player):
+            if not is_ai:
+                 self.logger.game_over(self.board, player)
+
         if self._is_check and self.whose_turn() and not all_white_moves:
             print("white lost")
+            log(Player.PLAYER_2)
             return 0
         elif self._is_check and not self.whose_turn() and not all_black_moves:
             print("black lost")
+            log(Player.PLAYER_1)
             return 1
         elif not all_white_moves and not all_black_moves:
+            log(None)
             return 2
         else:
             return 3
@@ -307,7 +330,7 @@ class game_state:
         return self._en_passant_previous
 
     # Move a piece
-    def move_piece(self, starting_square, ending_square, is_ai):
+    def move_piece(self, starting_square, ending_square, is_ai, log = False):
         current_square_row = starting_square[0]  # The integer row value of the starting square
         current_square_col = starting_square[1]  # The integer col value of the starting square
         next_square_row = ending_square[0]  # The integer row value of the ending square
@@ -397,6 +420,8 @@ class game_state:
                             self.black_king_can_castle[0] = False
                         self._black_king_location = (next_square_row, next_square_col)
                         # self.can_en_passant_bool = False  WHAT IS THIS
+
+
                 elif moving_piece.get_name() is "r":
                     if moving_piece.is_player(Player.PLAYER_1) and current_square_col == 0:
                         self.white_king_can_castle[1] = False
@@ -466,10 +491,16 @@ class game_state:
 
                 self.white_turn = not self.white_turn
 
+                #log
+                if log:
+                    self.logger.log_move(self.board, self.move_log[-1])
             else:
+
                 pass
 
-    def undo_move(self):
+    def undo_move(self, its_ai = False):
+
+
         if self.move_log:
             undoing_move = self.move_log.pop()
             if undoing_move.castled is True:
@@ -549,6 +580,10 @@ class game_state:
             elif undoing_move.moving_piece.get_name() is 'k' and undoing_move.moving_piece.get_player() is Player.PLAYER_2:
                 self._black_king_location = (undoing_move.starting_square_row, undoing_move.starting_square_col)
 
+            #log
+            if not its_ai:
+                self.logger.log_undo_move(self.board,undoing_move)
+
             return undoing_move
         else:
             print("Back to the beginning!")
@@ -568,7 +603,7 @@ class game_state:
      - if there are no valid moves to prevent check, checkmate
     '''
 
-    def check_for_check(self, king_location, player):
+    def check_for_check(self, king_location, player ):
         # self._is_check = False
         _checks = []
         _pins = []
@@ -854,6 +889,8 @@ class game_state:
                     # self._is_check = True
                     _checks.append((king_location_row + row_change[i], king_location_col + col_change[i]))
         # print([_checks, _pins, _pins_check])
+
+
         return [_checks, _pins, _pins_check]
 
 
