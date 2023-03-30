@@ -96,77 +96,77 @@ def other_player(player):
     else:
         return Player.PLAYER_1
 
+from datetime import datetime
+
 def main():
-    # Check for the number of players and the color of the AI
+    start_time = datetime.now()
+    print(start_time)
+    for _ in range(10):
+        py.init()
+        screen = py.display.set_mode((WIDTH, HEIGHT))
+        clock = py.time.Clock()
 
-    py.init()
-    screen = py.display.set_mode((WIDTH, HEIGHT))
-    clock = py.time.Clock()
+        load_images()
+        running = True
+        square_selected = ()  # keeps track of the last selected square
+        player_clicks = []  # keeps track of player clicks (two tuples)
+        valid_moves = []
+        game_over = False
+        ai = ai_engine.chess_ai()
+        game_state = chess_engine.game_state()
 
-    load_images()
-    running = True
-    square_selected = ()  # keeps track of the last selected square
-    player_clicks = []  # keeps track of player clicks (two tuples)
-    valid_moves = []
-    game_over = False
-    ai = ai_engine.chess_ai()
-    game_state = chess_engine.game_state()
+        # log
+        game_state.set_ai_mode(ai_player=Player.PLAYER_2)
 
-    # log
-    game_state.set_ai_mode(ai_player=Player.PLAYER_2)
+        turn = Player.PLAYER_1
+        while running:
 
-    turn = Player.PLAYER_1
-    while running:
-
-        do_ai_move =  random_bool()
-
-        if turn is Player.PLAYER_1 and do_ai_move:
             do_ai_move = random_bool()
 
-        if turn is Player.PLAYER_1 and do_ai_move:
-            do_ai_move = random_bool()
+            if do_ai_move:
+                    if turn is Player.PLAYER_2:
+                        ai_move = ai.minimax_white(game_state, 3, -100000, 100000, True, Player.PLAYER_2)
+                    elif turn is Player.PLAYER_1:
+                        ai_move = ai.minimax_black(game_state, 3, -100000, 100000, True, Player.PLAYER_1)
 
-
-        if do_ai_move:
-                if turn is Player.PLAYER_2:
-                    ai_move = ai.minimax_white(game_state, 3, -100000, 100000, True, Player.PLAYER_2)
-                elif turn is Player.PLAYER_1:
-                    ai_move = ai.minimax_black(game_state, 3, -100000, 100000, True, Player.PLAYER_1)
-
-                if type(ai_move) != int:
-                   game_state.move_piece(ai_move[0], ai_move[1], True, log=True)
-                   print('ai')
-        else:
-            all_valid_move = game_state.get_all_legal_moves(turn)
-            rand_move = random.choice(all_valid_move)
-            game_state.move_piece(rand_move[0], rand_move[1],True, log=True)
-            print("rand")
+                    if type(ai_move) != int:
+                       game_state.move_piece(ai_move[0], ai_move[1], True, log=True)
+                       print('ai')
+            else:
+                all_valid_move = game_state.get_all_legal_moves(turn)
+                rand_move = random.choice(all_valid_move)
+                game_state.move_piece(rand_move[0], rand_move[1],True, log=True)
+                print("rand")
 
 
 
-        turn  = other_player(turn)
-        draw_game_state(screen, game_state, valid_moves, square_selected)
+            turn  = other_player(turn)
+            draw_game_state(screen, game_state, valid_moves, square_selected)
 
-        endgame = game_state.checkmate_stalemate_checker()
-        if endgame == 0:
-                game_over = True
-                draw_text(screen, "Black wins.")
+            endgame = game_state.checkmate_stalemate_checker()
+            if endgame == 0:
+                    game_over = True
+                    draw_text(screen, "Black wins.")
+                    running = False
+            elif endgame == 1:
+                    game_over = True
+                    draw_text(screen, "White wins.")
+                    running = False
+                    #return
+            elif endgame == 2:
+                    game_over = True
+                    draw_text(screen, "Stalemate.")
+                    running = False
+                    #return
+
+
+            clock.tick(MAX_FPS)
+            py.display.flip()
+
+            elapsed = datetime.now() - start_time
+            if elapsed.seconds/60 > 90:
+                print('end time')
                 return
-        elif endgame == 1:
-                game_over = True
-                draw_text(screen, "White wins.")
-                return
-        elif endgame == 2:
-                game_over = True
-                draw_text(screen, "Stalemate.")
-                return
-
-
-        clock.tick(MAX_FPS)
-        py.display.flip()
-
-
-
 
 def draw_text(screen, text):
     font = py.font.SysFont("Helvitca", 32, True, False)
