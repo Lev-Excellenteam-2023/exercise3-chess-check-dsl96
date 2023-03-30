@@ -17,7 +17,7 @@ class chess_ai:
     get the value of each piece
     '''
     def minimax_white(self, game_state, depth, alpha, beta, maximizing_player, player_color):
-        csc = game_state.checkmate_stalemate_checker()
+        csc = game_state.checkmate_stalemate_checker(is_ai=True )
         if maximizing_player:
             if csc == 0:
                 return 5000000
@@ -42,7 +42,7 @@ class chess_ai:
             for move_pair in all_possible_moves:
                 game_state.move_piece(move_pair[0], move_pair[1], True)
                 evaluation = self.minimax_white(game_state, depth - 1, alpha, beta, False, "white")
-                game_state.undo_move()
+                game_state.undo_move(its_ai=True)
 
                 if max_evaluation < evaluation:
                     max_evaluation = evaluation
@@ -60,7 +60,7 @@ class chess_ai:
             for move_pair in all_possible_moves:
                 game_state.move_piece(move_pair[0], move_pair[1], True)
                 evaluation = self.minimax_white(game_state, depth - 1, alpha, beta, True, "black")
-                game_state.undo_move()
+                game_state.undo_move(its_ai=True)
 
                 if min_evaluation > evaluation:
                     min_evaluation = evaluation
@@ -74,7 +74,7 @@ class chess_ai:
                 return min_evaluation
 
     def minimax_black(self, game_state, depth, alpha, beta, maximizing_player, player_color):
-        csc = game_state.checkmate_stalemate_checker()
+        csc = game_state.checkmate_stalemate_checker(is_ai=True)
         if maximizing_player:
             if csc == 1:
                 return 5000000
@@ -99,7 +99,7 @@ class chess_ai:
             for move_pair in all_possible_moves:
                 game_state.move_piece(move_pair[0], move_pair[1], True)
                 evaluation = self.minimax_black(game_state, depth - 1, alpha, beta, False, "black")
-                game_state.undo_move()
+                game_state.undo_move(its_ai=True)
 
                 if max_evaluation < evaluation:
                     max_evaluation = evaluation
@@ -117,7 +117,7 @@ class chess_ai:
             for move_pair in all_possible_moves:
                 game_state.move_piece(move_pair[0], move_pair[1], True)
                 evaluation = self.minimax_black(game_state, depth - 1, alpha, beta, True, "white")
-                game_state.undo_move()
+                game_state.undo_move(its_ai=True)
 
                 if min_evaluation > evaluation:
                     min_evaluation = evaluation
@@ -143,19 +143,6 @@ class chess_ai:
         if player is Player.PLAYER_1:
             if piece.is_player("black"):
                 if piece.get_name() is "k":
-                    return -1000
-                elif piece.get_name() is "q":
-                    return -100
-                elif piece.get_name() is "r":
-                    return -50
-                elif piece.get_name() is "b":
-                    return -30
-                elif piece.get_name() is "n":
-                    return -30
-                elif piece.get_name() is "p":
-                    return -10
-            else:
-                if piece.get_name() is "k":
                     return 1000
                 elif piece.get_name() is "q":
                     return 100
@@ -167,6 +154,19 @@ class chess_ai:
                     return 30
                 elif piece.get_name() is "p":
                     return 10
+            else:
+                if piece.get_name() is "k":
+                    return -1000
+                elif piece.get_name() is "q":
+                    return -100
+                elif piece.get_name() is "r":
+                    return -50
+                elif piece.get_name() is "b":
+                    return -30
+                elif piece.get_name() is "n":
+                    return -30
+                elif piece.get_name() is "p":
+                    return -10
         else:
             if piece.is_player("white"):
                 if piece.get_name() is "k":

@@ -111,7 +111,7 @@ def main():
     py.init()
     screen = py.display.set_mode((WIDTH, HEIGHT))
     clock = py.time.Clock()
-    game_state = chess_engine.game_state()
+
     load_images()
     running = True
     square_selected = ()  # keeps track of the last selected square
@@ -123,7 +123,12 @@ def main():
     game_state = chess_engine.game_state()
     if human_player is 'b':
         ai_move = ai.minimax_black(game_state, 3, -100000, 100000, True, Player.PLAYER_1)
-        game_state.move_piece(ai_move[0], ai_move[1], True)
+        #log
+        game_state.set_ai_mode(ai_player=Player.PLAYER_1)
+        game_state.move_piece(ai_move[0], ai_move[1],False)
+    elif human_player is 'w':
+        #log
+        game_state.set_ai_mode(ai_player=Player.PLAYER_2)
 
     while running:
         for e in py.event.get():
@@ -148,17 +153,18 @@ def main():
                             valid_moves = []
                         else:
                             game_state.move_piece((player_clicks[0][0], player_clicks[0][1]),
-                                                  (player_clicks[1][0], player_clicks[1][1]), False)
+                                                  (player_clicks[1][0], player_clicks[1][1]), False,log=True)
                             square_selected = ()
                             player_clicks = []
                             valid_moves = []
 
-                            if human_player is 'w':
-                                ai_move = ai.minimax_white(game_state, 3, -100000, 100000, True, Player.PLAYER_2)
-                                game_state.move_piece(ai_move[0], ai_move[1], True)
-                            elif human_player is 'b':
-                                ai_move = ai.minimax_black(game_state, 3, -100000, 100000, True, Player.PLAYER_1)
-                                game_state.move_piece(ai_move[0], ai_move[1], True)
+                            if human_player:
+                                if human_player is 'w':
+                                    ai_move = ai.minimax_white(game_state, 3, -100000, 100000, True, Player.PLAYER_2)
+                                elif human_player is 'b':
+                                    ai_move = ai.minimax_black(game_state, 3, -100000, 100000, True, Player.PLAYER_1)
+                                if type(ai_move) != int:
+                                    game_state.move_piece(ai_move[0], ai_move[1], True, log=True)
                     else:
                         valid_moves = game_state.get_valid_moves((row, col))
                         if valid_moves is None:
@@ -172,21 +178,23 @@ def main():
                     player_clicks = []
                     valid_moves = []
                 elif e.key == py.K_u:
-                    game_state.undo_move()
+                    game_state.undo_move(its_ai=False)
                     print(len(game_state.move_log))
 
-        draw_game_state(screen, game_state, valid_moves, square_selected)
+            draw_game_state(screen, game_state, valid_moves, square_selected)
 
-        endgame = game_state.checkmate_stalemate_checker()
-        if endgame == 0:
-            game_over = True
-            draw_text(screen, "Black wins.")
-        elif endgame == 1:
-            game_over = True
-            draw_text(screen, "White wins.")
-        elif endgame == 2:
-            game_over = True
-            draw_text(screen, "Stalemate.")
+            endgame = game_state.checkmate_stalemate_checker()
+            if endgame == 0:
+                game_over = True
+                draw_text(screen, "Black wins.")
+            elif endgame == 1:
+                game_over = True
+                draw_text(screen, "White wins.")
+            elif endgame == 2:
+                game_over = True
+                draw_text(screen, "Stalemate.")
+            elif endgame == 3:
+                game_over =False
 
         clock.tick(MAX_FPS)
         py.display.flip()
